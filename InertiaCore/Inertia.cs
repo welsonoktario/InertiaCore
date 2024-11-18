@@ -28,5 +28,7 @@ public static class Inertia
 
     public static void Share(IDictionary<string, object?> data) => _factory.Share(data);
 
+    public static void Flash(string key, string? value) => _factory.Flash(key, value);
+
     public static LazyProp Lazy(Func<object?> callback) => _factory.Lazy(callback);
 }

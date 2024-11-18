@@ -1,7 +1,6 @@
 using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using InertiaCore.Extensions;
 using InertiaCore.Models;
 using InertiaCore.Ssr;
 using InertiaCore.Utils;
@@ -21,6 +20,7 @@ internal interface IResponseFactory
     public LocationResult Location(string url);
     public void Share(string key, object? value);
     public void Share(IDictionary<string, object?> data);
+    public void Flash(string key, string? value);
     public LazyProp Lazy(Func<object?> callback);
     public LazyProp Lazy(Func<Task<object?>> callback);
 }
@@ -119,6 +119,16 @@ internal class ResponseFactory : IResponseFactory
         context.Features.Set(sharedData);
     }
 
-    public LazyProp Lazy(Func<object?> callback) => new LazyProp(callback);
-    public LazyProp Lazy(Func<Task<object?>> callback) => new LazyProp(callback);
+    public void Flash(string key, string? value)
+    {
+        var context = _contextAccessor.HttpContext!;
+
+        var flash = context.Features.Get<InertiaFlashMessages>() ?? InertiaFlashMessages.FromSession(context);
+        flash.Set(key, value);
+
+        context.Features.Set(flash);
+    }
+
+    public LazyProp Lazy(Func<object?> callback) => new(callback);
+    public LazyProp Lazy(Func<Task<object?>> callback) => new(callback);
 }
